@@ -27,6 +27,9 @@ export class LeadForm {
     formContainer.className = 'lead-form-container';
     formContainer.id = 'lead-form-container';
 
+    formContainer.style.maxHeight = '70vh';
+    formContainer.style.overflowY = 'auto';
+
     // Form header
     const header = document.createElement('div');
     header.className = 'lead-form-header';
@@ -86,6 +89,8 @@ export class LeadForm {
     submitButton.id = 'lead-submit-btn';
     submitButton.className = 'lead-submit-btn';
     submitButton.textContent = 'Submit';
+    submitButton.style.backgroundColor = '#d32f2f';
+    submitButton.style.color = 'white';
     buttonsContainer.appendChild(submitButton);
 
     // Skip button
@@ -137,11 +142,9 @@ export class LeadForm {
     container.style.padding = '20px';
     container.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
     container.style.width = '100%';
-    container.style.maxWidth = '400px';
-    container.style.margin = 'auto';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '20px';
+    container.style.height = '100%';
+    container.style.maxWidth = '';
+    container.style.margin = '';
 
     // Header styles
     const header = container.querySelector('.lead-form-header') as HTMLDivElement;
@@ -207,7 +210,7 @@ export class LeadForm {
         // Submit button styles
         const submitBtn = buttonsContainer.querySelector('.lead-submit-btn') as HTMLButtonElement;
         if (submitBtn) {
-          submitBtn.style.backgroundColor = '#6b46c1';
+          submitBtn.style.backgroundColor = '#d32f2f';
           submitBtn.style.color = 'white';
           submitBtn.style.border = 'none';
           submitBtn.style.padding = '10px 20px';

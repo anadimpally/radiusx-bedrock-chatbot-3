@@ -369,7 +369,7 @@ export class Chatbot {
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
     header.style.padding = '12px 16px';
-    header.style.backgroundColor = '#6b46c1';
+    header.style.backgroundColor = '#d32f2f';
     header.style.color = 'white';
     header.style.borderRadius = '8px 8px 0 0';
     header.style.cursor = 'pointer';

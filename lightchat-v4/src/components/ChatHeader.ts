@@ -41,6 +41,8 @@ export class ChatHeader {
     const header = document.createElement('div');
     header.className = 'chatbot-header';
     header.id = 'chatbot-header';
+    header.style.backgroundColor = '#d32f2f';
+    header.style.color = 'white';
 
     // Logo and title
     const logoTitle = document.createElement('div');
