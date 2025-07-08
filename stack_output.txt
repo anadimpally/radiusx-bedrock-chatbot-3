@@ -1,0 +1,15 @@
+Outputs:
+BedrockChatStack.AuthUserPoolClientId8216BF9A = 7hk0lksaoi07mjq0vf5anppb86
+BedrockChatStack.AuthUserPoolIdC0605E59 = us-east-1_ZtUs66y0F
+BedrockChatStack.BackendApiBackendApiUrl4A0A7879 = https://78ft9bqmza.execute-api.us-east-1.amazonaws.com
+BedrockChatStack.ConversationTableName = BedrockChatStack-DatabaseConversationTable03F3FD7A-1TQ25US825Z23
+BedrockChatStack.DatabaseConversationTableNameDDF11821 = BedrockChatStack-DatabaseConversationTable03F3FD7A-1TQ25US825Z23
+BedrockChatStack.DocumentBucketName = bedrockregionresourcessta-useast1documentbucket038-adsd8nuznrq0
+BedrockChatStack.FrontendURL = https://d1aos2rgcxsbxt.cloudfront.net
+BedrockChatStack.LargeMessageBucketName = bedrockchatstack-largemessagebucketad0c9b6b-ohhxisoadact
+BedrockChatStack.PublishedApiWebAclArn = arn:aws:wafv2:us-east-1:058264419432:regional/webacl/ApiWebAcl-WebAclForPublishedApi/415c7b5c-c25d-4ddd-a41a-9a0e02754a89
+BedrockChatStack.TableAccessRoleArn = arn:aws:iam::058264419432:role/BedrockChatStack-DatabaseTableAccessRole59AAC05E-Hb0URINehu20
+BedrockChatStack.UsageAnalysisUsageAnalysisOutputLocation52B0D96C = s3://bedrockchatstack-usageanalysisqueryresultbucketef0-70rczelmjssg
+BedrockChatStack.UsageAnalysisUsageAnalysisWorkgroup5D908EDF = bedrockchatstack_wg
+BedrockChatStack.WebAclForPublishedApiWebAclArn2C0995DA = arn:aws:wafv2:us-east-1:058264419432:regional/webacl/ApiWebAcl-WebAclForPublishedApi/415c7b5c-c25d-4ddd-a41a-9a0e02754a89
+BedrockChatStack.WebSocketWebSocketEndpointF298FA8F = wss://ecbuwb8r1c.execute-api.us-east-1.amazonaws.com/dev

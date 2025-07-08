@@ -1,0 +1,32 @@
+name: Cleanup Resources
+
+on:
+  delete:
+    branches:
+      - "none"
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event.ref_type == 'branch'
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Delete CloudFormation stack
+        run: |
+          BRANCH_NAME=$(echo ${{ github.event.ref }} | sed 's/refs\/heads\///')
+          STACK_NAME="CodeBuildForDeploy-${BRANCH_NAME}"
+
+          if aws cloudformation describe-stacks --stack-name $STACK_NAME 2>/dev/null; then
+            echo "Deleting stack $STACK_NAME..."
+            aws cloudformation delete-stack --stack-name $STACK_NAME
+            aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
+          fi

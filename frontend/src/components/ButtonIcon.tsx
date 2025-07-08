@@ -1,0 +1,37 @@
+import React from 'react';
+import { BaseProps } from '../@types/common';
+import { twMerge } from 'tailwind-merge';
+
+type Props = BaseProps & {
+  disabled?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+};
+
+/**
+ * Button component for displaying an icon.
+ *
+ * @param {Props} props - The properties for the ButtonIcon component.
+ * @returns {JSX.Element} The rendered ButtonIcon component.
+ */
+const ButtonIcon: React.FC<Props> = (props) => {
+  return (
+    <button
+      className={twMerge(
+        'flex items-center justify-center rounded-full p-2 text-xl hover:shadow',
+        'dark:text-aws-font-color-dark dark:hover:shadow-aws-font-color-dark',
+        props.disabled ? 'opacity-30' : 'hover:brightness-75',
+        props.className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        props.onClick();
+      }}
+      disabled={props.disabled}>
+      {props.children}
+    </button>
+  );
+};
+
+export default ButtonIcon;

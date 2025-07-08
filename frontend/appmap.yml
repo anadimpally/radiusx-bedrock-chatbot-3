@@ -1,0 +1,5 @@
+appmap_dir: tmp/appmap
+language: javascript
+name: frontend
+packages:
+- path: ./

@@ -1,0 +1,49 @@
+{
+	"files": [
+		{
+			"path": "backend/app/usecases/chat.py",
+			"bookmarks": [
+				{
+					"line": 579,
+					"column": 8,
+					"label": "fetch_conversation"
+				}
+			]
+		},
+		{
+			"path": "backend/app/repositories/conversation.py",
+			"bookmarks": [
+				{
+					"line": 150,
+					"column": 18,
+					"label": "find_conversation_by_id"
+				}
+			]
+		},
+		{
+			"path": "backend/app/prompt.py",
+			"bookmarks": [
+				{
+					"line": 5,
+					"column": 20,
+					"label": "build_rag_prompt"
+				}
+			]
+		},
+		{
+			"path": "frontend/src/pages/ChatPage.tsx",
+			"bookmarks": [
+				{
+					"line": 328,
+					"column": 39,
+					"label": "ChatMessageWithRelatedDocuments def"
+				},
+				{
+					"line": 522,
+					"column": 27,
+					"label": "ChatMessageWithRelatedDocuments"
+				}
+			]
+		}
+	]
+}

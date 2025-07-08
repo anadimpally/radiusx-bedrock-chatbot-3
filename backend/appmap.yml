@@ -1,0 +1,6 @@
+appmap_dir: tmp/appmap
+language: python
+name: backend
+packages:
+- path: app
+record_test_cases: false

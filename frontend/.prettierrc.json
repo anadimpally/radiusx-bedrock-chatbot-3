@@ -1,0 +1,18 @@
+{
+  /**
+   * Prettier configuration for code formatting.
+   *
+   * This configuration defines formatting rules for the project,
+   * including trailing commas, tab width, and quote style.
+   */
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": false,
+  "bracketSpacing": false,
+  "bracketSameLine": false,
+  "arrowParens": "always",
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ]
+}
