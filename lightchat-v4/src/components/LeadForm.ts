@@ -145,6 +145,17 @@ export class LeadForm {
     container.style.height = '100%';
     container.style.maxWidth = '';
     container.style.margin = '';
+    container.style.padding = '0';
+    container.style.boxShadow = '';
+
+    // Ensure the form inside also fills the container
+    const form = container.querySelector('.lead-form') as HTMLFormElement;
+    if (form) {
+      form.style.width = '100%';
+      form.style.height = '100%';
+      form.style.margin = '0';
+      form.style.padding = '0';
+    }
 
     // Header styles
     const header = container.querySelector('.lead-form-header') as HTMLDivElement;
@@ -168,7 +179,6 @@ export class LeadForm {
     }
 
     // Form styles
-    const form = container.querySelector('.lead-form') as HTMLFormElement;
     if (form) {
       form.style.display = 'flex';
       form.style.flexDirection = 'column';

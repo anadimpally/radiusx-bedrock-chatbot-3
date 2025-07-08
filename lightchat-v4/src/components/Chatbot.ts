@@ -347,15 +347,17 @@ export class Chatbot {
     // Apply container styles
     this.container.style.display = 'flex';
     this.container.style.flexDirection = 'column';
-    this.container.style.position = 'fixed';
-    this.container.style.bottom = '20px';
-    this.container.style.right = '20px';
-    this.container.style.width = '420px';
-    this.container.style.height = '600px';
-    this.container.style.maxHeight = '80vh';
-    this.container.style.backgroundColor = '#ffffff';
-    this.container.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    this.container.style.borderRadius = '8px';
+    this.container.style.position = '';
+    this.container.style.top = '';
+    this.container.style.left = '';
+    this.container.style.right = '';
+    this.container.style.bottom = '';
+    this.container.style.width = '100vw';
+    this.container.style.height = '100vh';
+    this.container.style.maxWidth = '100vw';
+    this.container.style.maxHeight = '100vh';
+    this.container.style.borderRadius = '';
+    this.container.style.boxShadow = '';
     this.container.style.zIndex = '1000';
     this.container.style.overflow = 'hidden';
 
