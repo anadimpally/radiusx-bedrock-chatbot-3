@@ -51,15 +51,10 @@ export class Chatbot {
       };
     });
 
-    // Check for user identification
+    // Check for user identification (but don't show anything yet)
     this.checkUserIdentification().then(() => {
-      // Check if we should show lead form first
-      if (this.shouldShowLeadForm()) {
-        this.showLeadForm();
-      } else {
-        // Only load conversations if we're not showing the lead form
-        this.loadConversations();
-      }
+      // User identification is complete, but don't show chatbot until user clicks launcher
+      console.log('User identification complete, waiting for user to click launcher');
     });
 
     // Add event listeners
@@ -70,9 +65,15 @@ export class Chatbot {
    * Check for user identification (cookie or new user)
    */
   private async checkUserIdentification(): Promise<void> {
-    // Check for existing user ID cookie
-    const userId = getCookie('chatbot_user_id');
-    console.log('Cookie userId:', userId);
+    // First try to get user ID from localStorage (more reliable for file:// protocol)
+    let userId = localStorage.getItem('chatbot_user_id');
+    console.log('localStorage userId:', userId);
+
+    // Fallback to cookie if localStorage doesn't have it
+    if (!userId) {
+      userId = getCookie('chatbot_user_id');
+      console.log('Cookie userId:', userId);
+    }
 
     if (userId) {
       // Check localStorage directly
@@ -95,9 +96,10 @@ export class Chatbot {
     }
 
     // If we get here, we either don't have a user ID or it wasn't found
-    // Create a new user ID and set cookie
+    // Create a new user ID and set both cookie and localStorage
     const newUserId = generateUUID();
     setCookie('chatbot_user_id', newUserId, 365); // Set cookie for 1 year
+    localStorage.setItem('chatbot_user_id', newUserId); // Also save to localStorage
 
     // Create new user data
     this.state.userData = {
@@ -307,6 +309,8 @@ export class Chatbot {
     const container = document.createElement('div');
     container.id = 'chatbot-container';
     container.className = 'chatbot-container';
+    // Start hidden - user must click launcher to open
+    container.style.display = 'none';
     return container;
   }
 
@@ -316,7 +320,22 @@ export class Chatbot {
   private createLauncher(): HTMLDivElement {
     const launcher = document.createElement('div');
     launcher.id = 'chatbot-launcher';
-    launcher.style.display = 'none';
+    // Start visible - user clicks this to open chatbot
+    launcher.style.display = 'flex';
+    launcher.style.position = 'fixed';
+    launcher.style.bottom = '20px';
+    launcher.style.right = '20px';
+    launcher.style.width = '60px';
+    launcher.style.height = '60px';
+    launcher.style.borderRadius = '50%';
+    launcher.style.backgroundColor = '#d32f2f';
+    launcher.style.color = 'white';
+    launcher.style.cursor = 'pointer';
+    launcher.style.justifyContent = 'center';
+    launcher.style.alignItems = 'center';
+    launcher.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    launcher.style.zIndex = '999';
+    launcher.style.transition = 'all 0.3s ease';
 
     const chatIcon = createSvgIcon(ICONS.CHAT, 24, 24);
     launcher.appendChild(chatIcon);
@@ -337,8 +356,7 @@ export class Chatbot {
       this.container.removeChild(this.container.firstChild);
     }
 
-    // Apply container styles
-    this.container.style.display = 'flex';
+    // Apply container styles (but keep it hidden initially)
     this.container.style.flexDirection = 'column';
     this.container.style.zIndex = '1000';
 
@@ -417,7 +435,7 @@ export class Chatbot {
     minimizeBtn.style.transition = 'all 0.3s ease';
     minimizeBtn.style.borderRadius = '50%';
     minimizeBtn.appendChild(createSvgIcon(ICONS.MINIMIZE));
-    minimizeBtn.addEventListener('click', this.minimizeChatbot.bind(this));
+    minimizeBtn.addEventListener('click', this.toggleMinimize.bind(this));
     headerActions.appendChild(minimizeBtn);
 
     const closeBtn = document.createElement('button');
@@ -481,7 +499,7 @@ export class Chatbot {
     newChatBtn.className = 'new-chat-btn';
     newChatBtn.id = 'new-chat-btn';
     newChatBtn.textContent = 'New Chat';
-    newChatBtn.style.backgroundColor = '#6b46c1';
+    newChatBtn.style.backgroundColor = '#d32f2f';
     newChatBtn.style.color = 'white';
     newChatBtn.style.border = 'none';
     newChatBtn.style.padding = '8px 12px';
@@ -545,7 +563,7 @@ export class Chatbot {
     startChatBtn.className = 'start-chat-btn';
     startChatBtn.id = 'start-chat-btn';
     startChatBtn.textContent = 'Start a new chat';
-    startChatBtn.style.backgroundColor = '#6b46c1';
+    startChatBtn.style.backgroundColor = '#d32f2f';
     startChatBtn.style.color = 'white';
     startChatBtn.style.border = 'none';
     startChatBtn.style.padding = '10px 16px';
@@ -755,18 +773,53 @@ export class Chatbot {
    * Add event listeners with proper TypeScript event types
    */
   private addEventListeners(): void {
-    // Launcher click event to restore chatbot
+    // Launcher click event to open/restore chatbot
     this.launcher.addEventListener('click', () => {
-      this.container.style.display = 'flex';
-      this.container.classList.remove('minimized');
-      this.container.style.height = '600px';
-      this.container.style.overflow = 'hidden';
-      this.launcher.style.display = 'none';
-      this.state.isMinimized = false;
+      console.log('Launcher clicked, isMinimized:', this.state.isMinimized);
+      
+      // If chatbot is minimized, restore it
+      if (this.state.isMinimized) {
+        console.log('Restoring minimized chatbot');
+        this.container.style.display = 'flex';
+        this.container.classList.remove('minimized');
+        this.container.style.height = '600px';
+        this.container.style.overflow = 'hidden';
+        this.launcher.style.display = 'none';
+        this.state.isMinimized = false;
+      } else {
+        // If chatbot is closed, open it
+        console.log('Opening closed chatbot');
+        this.container.style.display = 'flex';
+        this.container.classList.remove('minimized');
+        this.container.style.height = '600px';
+        this.container.style.overflow = 'hidden';
+        this.launcher.style.display = 'none';
+        this.state.isMinimized = false;
 
-      // Check if we should show lead form on open
-      if (this.shouldShowLeadForm()) {
-        this.showLeadForm();
+        // Check if we should show lead form or load conversations
+        if (this.shouldShowLeadForm()) {
+          this.showLeadForm();
+        } else {
+          this.loadConversations();
+        }
+      }
+    });
+
+    // Container click event for when minimized (the minimized container itself becomes clickable)
+    this.container.addEventListener('click', (e) => {
+      // Only handle clicks when minimized and not on header buttons
+      if (this.state.isMinimized) {
+        const target = e.target as HTMLElement;
+        // Don't restore if clicking on header buttons (minimize, close, etc.)
+        if (!target.closest('.header-actions') && !target.closest('.header-button')) {
+          console.log('Minimized container clicked, restoring chatbot');
+          this.container.style.display = 'flex';
+          this.container.classList.remove('minimized');
+          this.container.style.height = '600px';
+          this.container.style.overflow = 'hidden';
+          this.launcher.style.display = 'none';
+          this.state.isMinimized = false;
+        }
       }
     });
 
@@ -827,14 +880,41 @@ export class Chatbot {
   }
 
   /**
+   * Toggle minimize/maximize state
+   */
+  private toggleMinimize(): void {
+    if (this.state.isMinimized) {
+      // Currently minimized, so maximize
+      console.log('Maximizing chatbot');
+      this.state.isMinimized = false;
+      this.container.classList.remove('minimized');
+      this.container.style.height = '600px';
+      this.container.style.overflow = 'hidden';
+      this.launcher.style.display = 'none';
+      console.log('Chatbot maximized, isMinimized:', this.state.isMinimized);
+    } else {
+      // Currently maximized, so minimize
+      console.log('Minimizing chatbot');
+      this.state.isMinimized = true;
+      this.container.classList.add('minimized');
+      this.container.style.height = '60px';
+      this.container.style.overflow = 'hidden';
+      this.launcher.style.display = 'flex';
+      console.log('Chatbot minimized, isMinimized:', this.state.isMinimized);
+    }
+  }
+
+  /**
    * Minimize the chatbot
    */
   private minimizeChatbot(): void {
+    console.log('Minimizing chatbot');
     this.state.isMinimized = true;
     this.container.classList.add('minimized');
     this.container.style.height = '60px';
     this.container.style.overflow = 'hidden';
     this.launcher.style.display = 'flex';
+    console.log('Chatbot minimized, isMinimized:', this.state.isMinimized);
   }
 
   /**
