@@ -14,7 +14,7 @@ export class ApiService {
    */
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/api/conversation`, {
+      const response = await fetch(`${this.apiBaseUrl}/conversation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export class ApiService {
    */
   async fetchConversation(conversationId: string): Promise<Conversation> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/api/conversation/${conversationId}`, {
+      const response = await fetch(`${this.apiBaseUrl}/conversation/${conversationId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export class ApiService {
    */
   async fetchMessage(conversationId: string, messageId: string): Promise<MessageFetchResponse> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/api/conversation/${conversationId}/${messageId}`, {
+      const response = await fetch(`${this.apiBaseUrl}/conversation/${conversationId}/${messageId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -262,7 +262,10 @@ export class ApiService {
   async updateUserData(userData: UserData): Promise<boolean> {
     try {
       // Store in localStorage as a fallback/cache
-      localStorage.setItem(`user_${userData.userId}`, JSON.stringify(userData));
+      const key = `user_${userData.userId}`;
+      const data = JSON.stringify(userData);
+      localStorage.setItem(key, data);
+      console.log('Saved user data to localStorage:', { key, data });
 
       // You could add a Lambda call here similar to submitLead if you want to store on the server
       // But this is optional and not required for the lead generation functionality

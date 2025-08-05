@@ -5,8 +5,8 @@ const fs = require('fs');
 
 // Configuration
 const PORT = 8080;
-const API_KEY = process.env.API_KEY || 'qQGPpzSOWTatz8Ucg6wcV1ZLxRLLmpho4gMQA3Ap'; // My Bot
-const API_BASE_URL = 'https://ftmmea2sfj.execute-api.us-east-1.amazonaws.com/api';
+const API_KEY =  'QUyv62nxTz5UebIKVMNAY9Con3IlfksN2SyvVJS0'; // My Bot
+const API_BASE_URL = 'https://84tzb2l6ri.execute-api.us-east-1.amazonaws.com/api';
 // const API_KEY = process.env.API_KEY || 'tJ4W9nHwTT1uhdbu8RXAL5EZBBNufqNayzDFIIZh'; // Replace with your actual API key or set as environment variable
 // const API_BASE_URL = 'https://sbimxqdrc0.execute-api.us-east-1.amazonaws.com/api';
 // Initialize express app

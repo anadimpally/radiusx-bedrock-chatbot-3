@@ -53,12 +53,12 @@ export class Chatbot {
 
     // Check for user identification
     this.checkUserIdentification().then(() => {
-      // Check if we should show lead form first
+      // Load conversations from storage
+      this.loadConversations();
+
+      // Check if we should show lead form
       if (this.shouldShowLeadForm()) {
         this.showLeadForm();
-      } else {
-        // Only load conversations if we're not showing the lead form
-        this.loadConversations();
       }
     });
 
@@ -72,24 +72,17 @@ export class Chatbot {
   private async checkUserIdentification(): Promise<void> {
     // Check for existing user ID cookie
     const userId = getCookie('chatbot_user_id');
-    console.log('Cookie userId:', userId);
 
     if (userId) {
-      // Check localStorage directly
-      const userDataKey = `user_${userId}`;
-      const rawUserData = localStorage.getItem(userDataKey);
-      console.log('Raw user data from localStorage:', rawUserData);
-      
       // If we have a user ID, try to fetch user data
       const userData = await this.apiService.checkUserExists(userId);
-      console.log('Loaded user data from API service:', userData);
 
       if (userData) {
         // User exists, update last seen
         this.state.userData = userData;
         userData.lastSeen = Date.now();
         await this.apiService.updateUserData(userData);
-        console.log('Returning user identified:', userId, 'hasCompletedLeadForm:', userData.hasCompletedLeadForm);
+        console.log('Returning user identified:', userId);
         return;
       }
     }
@@ -118,10 +111,28 @@ export class Chatbot {
    * Determine if we should show the lead form
    */
   private shouldShowLeadForm(): boolean {
-    return this.state.showLeadForm === true || 
-           (!!this.state.userData && 
-            !this.state.userData.hasCompletedLeadForm && 
-            !this.state.userData.leadInfo);
+    // If we already showed it in this session, don't show again
+    if (this.state.showLeadForm === false) {
+      return false;
+    }
+
+    // If we don't have user data yet, don't show
+    if (!this.state.userData) {
+      return false;
+    }
+
+    // If user has already completed the lead form, don't show
+    if (this.state.userData.hasCompletedLeadForm) {
+      return false;
+    }
+
+    // If user has lead info, don't show
+    if (this.state.userData.leadInfo) {
+      return false;
+    }
+
+    // Otherwise, show the form
+    return true;
   }
 
   /**
@@ -129,15 +140,6 @@ export class Chatbot {
    */
   private showLeadForm(): void {
     console.log('Showing lead form');
-
-    // Set state to indicate we're showing the lead form
-    this.state.showLeadForm = true;
-
-    // Clear existing content first to prevent duplication
-    const mainArea = document.getElementById('chatbot-main');
-    if (mainArea) {
-      mainArea.innerHTML = '';
-    }
 
     // Create and show the lead form
     this.leadForm = new LeadForm(
@@ -173,8 +175,6 @@ export class Chatbot {
     this.state.userData.leadInfo = leadData;
     this.state.userData.hasCompletedLeadForm = true;
 
-    console.log('Updated user data:', this.state.userData);
-
     // Use the active conversation ID, or if none exists, pass null
     const activeConversationId = this.state.activeConversationId;
     // Upload lead data to API/DynamoDB
@@ -185,8 +185,7 @@ export class Chatbot {
     }
 
     // Update user data in backend
-    const updateResult = await this.apiService.updateUserData(this.state.userData);
-    console.log('User data update result:', updateResult);
+    await this.apiService.updateUserData(this.state.userData);
 
     // Remove the lead form
     if (this.leadForm) {
@@ -197,24 +196,29 @@ export class Chatbot {
     // Show normal chat interface
     this.state.showLeadForm = false;
 
-    // Ensure DOM structure exists before creating new chat
-    this.ensureCorrectDOMStructure();
-    this.addEventListeners();
+    // Show empty state or active conversation
+    if (this.state.activeConversationId) {
+      this.setActiveConversation(this.state.activeConversationId);
+    } else {
+      this.showEmptyState();
+    }
 
-    // Create new chat and send welcome message
-    this.createNewChat();
-
-    // Add lead info to the new conversation
+    // If user has an active conversation, add lead info to it
     if (this.state.activeConversationId && this.state.conversations[this.state.activeConversationId]) {
       this.state.conversations[this.state.activeConversationId].leadInfo = leadData;
       saveConversationsToStorage(this.state.conversations);
     }
 
-    // Add a small delay before sending welcome message
-    setTimeout(() => {
-      const welcomeMessage = `Hi ${leadData.name || 'there'}! Thanks for sharing your information. How can I help you today?`;
-      this.simulateBotMessage(welcomeMessage);
-    }, 500);
+    // Send welcome message
+    if (!this.state.activeConversationId) {
+      this.createNewChat();
+
+      // Add a small delay before sending welcome message
+      setTimeout(() => {
+        const welcomeMessage = `Hi ${leadData.name || 'there'}! Thanks for sharing your information. How can I help you today?`;
+        this.simulateBotMessage(welcomeMessage);
+      }, 500);
+    }
   }
 
   /**
@@ -238,9 +242,12 @@ export class Chatbot {
     // Show normal chat interface
     this.state.showLeadForm = false;
 
-    // Ensure DOM structure exists before creating new chat
-    this.ensureCorrectDOMStructure();
-    this.addEventListeners();
+    // Show empty state or active conversation
+    if (this.state.activeConversationId) {
+      this.setActiveConversation(this.state.activeConversationId);
+    } else {
+      this.showEmptyState();
+    }
 
     // Send welcome message if no active conversation
     if (!this.state.activeConversationId) {
@@ -666,10 +673,8 @@ export class Chatbot {
    * Load conversations from localStorage with better validation
    */
   private loadConversations(): void {
-    console.log('Loading conversations from storage...');
     // Load conversations from storage
     const storedConversations = loadConversationsFromStorage();
-    console.log('Stored conversations:', storedConversations);
 
     // Validate and fix each conversation before setting state
     for (const [id, conversation] of Object.entries(storedConversations)) {
@@ -716,15 +721,12 @@ export class Chatbot {
 
     // Check if we have any conversations
     const hasConversations = Object.keys(this.state.conversations).length > 0;
-    console.log('Has conversations:', hasConversations);
 
     if (hasConversations) {
       // Set the most recent conversation as active
       const mostRecentId = Object.keys(this.state.conversations).sort((a, b) => {
         return this.state.conversations[b].createTime - this.state.conversations[a].createTime;
       })[0];
-      
-      console.log('Most recent conversation ID:', mostRecentId);
 
       // Update the UI before setting active conversation
       this.updateConversationsList();
@@ -732,7 +734,6 @@ export class Chatbot {
       // Set active conversation
       this.setActiveConversation(mostRecentId);
     } else {
-      console.log('No conversations found, showing empty state');
       // Show empty state
       const emptyState = document.getElementById('empty-state');
       const messagesContainer = document.getElementById('messages-container');
@@ -844,8 +845,6 @@ export class Chatbot {
     this.container.style.display = 'none';
     this.launcher.style.display = 'flex';
   }
-
-
 
   /**
    * Update the sidebar with the current conversations
@@ -1125,29 +1124,20 @@ export class Chatbot {
    * Render messages for the active conversation
    */
   private renderMessages(): void {
-    console.log('renderMessages called');
     const messagesContainer = document.getElementById('messages-container');
-    console.log('messagesContainer found:', !!messagesContainer);
-    
-    if (!messagesContainer) {
-      console.log('No messages container found, returning');
-      return;
-    }
+    if (!messagesContainer) return;
 
     // Clear the messages container first
     messagesContainer.innerHTML = '';
 
     if (!this.state.activeConversationId || !this.state.conversations[this.state.activeConversationId]) {
-      console.log('No active conversation or conversation not found');
       return;
     }
 
     const conversation = this.state.conversations[this.state.activeConversationId];
     const messageMap = conversation.messageMap;
-    console.log('Message map keys:', Object.keys(messageMap || {}));
 
     if (!messageMap || Object.keys(messageMap).length === 0) {
-      console.log('No messages in conversation');
       return;
     }
 
@@ -1243,52 +1233,8 @@ export class Chatbot {
         // Process citation references - replace with clickable spans
         messageText = this.processCitationReferences(messageText, message);
 
-        // Check if message is too long and add read more functionality
-        const maxLength = 500; // Show first 300 characters
-        if (messageText.length > maxLength) {
-          const shortText = messageText.substring(0, maxLength) + '...';
-          const fullText = messageText;
-          
-          // Create container for the message content
-          const contentContainer = document.createElement('div');
-          contentContainer.innerHTML = shortText;
-          
-          // Create read more button
-          const readMoreBtn = document.createElement('button');
-          readMoreBtn.textContent = 'Read more';
-          readMoreBtn.style.background = 'none';
-          readMoreBtn.style.border = 'none';
-          readMoreBtn.style.color = '#6b46c1';
-          readMoreBtn.style.cursor = 'pointer';
-          readMoreBtn.style.fontSize = '12px';
-          readMoreBtn.style.padding = '4px 0';
-          readMoreBtn.style.marginTop = '8px';
-          readMoreBtn.style.textDecoration = 'underline';
-          
-          // Track if content is expanded
-          let isExpanded = false;
-          
-          // Add click event to toggle between short and full text
-          readMoreBtn.addEventListener('click', () => {
-            if (!isExpanded) {
-              contentContainer.innerHTML = fullText;
-              readMoreBtn.textContent = 'Read less';
-              isExpanded = true;
-            } else {
-              contentContainer.innerHTML = shortText;
-              readMoreBtn.textContent = 'Read more';
-              isExpanded = false;
-            }
-          });
-          
-          // Clear the message element and add content
-          messageEl.innerHTML = '';
-          messageEl.appendChild(contentContainer);
-          messageEl.appendChild(readMoreBtn);
-        } else {
-          // Set the processed HTML content for short messages
-          messageEl.innerHTML = messageText;
-        }
+        // Set the processed HTML content
+        messageEl.innerHTML = messageText;
       }
     }
 
