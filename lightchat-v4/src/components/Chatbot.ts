@@ -1320,12 +1320,16 @@ export class Chatbot {
       if (content.contentType === 'text') {
         let messageText = content.body;
 
+        // Convert URLs to clickable links first
+        messageText = this.convertUrlsToLinks(messageText);
+        
         // Process citation references - replace with clickable spans
         messageText = this.processCitationReferences(messageText, message);
 
         // Check if message is too long and add read more functionality
-        const maxLength = 500; // Show first 300 characters
+        const maxLength = 500; // Show first 500 characters
         if (messageText.length > maxLength) {
+          // Truncate the processed text (which already has URLs converted)
           const shortText = messageText.substring(0, maxLength) + '...';
           const fullText = messageText;
           
@@ -1392,6 +1396,50 @@ export class Chatbot {
 
     // Scroll to the bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  /**
+   * Convert URLs in text to clickable HTML links
+   */
+  private convertUrlsToLinks(text: string): string {
+    console.log('Converting URLs in text:', text);
+    
+    // URL regex patterns
+    const urlPatterns = [
+      // HTTP/HTTPS URLs
+      /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g,
+      // WWW URLs (without protocol)
+      /(www\.[^\s<]+[^<.,:;"')\]\s])/g,
+      // Email addresses
+      /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
+    ];
+
+    let processedText = text;
+
+    // Process each URL pattern
+    urlPatterns.forEach(pattern => {
+      processedText = processedText.replace(pattern, (match) => {
+        console.log('Found URL match:', match);
+        let url = match;
+        
+        // Add protocol if missing (for www URLs)
+        if (url.startsWith('www.')) {
+          url = 'https://' + url;
+        }
+        
+        // Add mailto: for email addresses
+        if (url.includes('@')) {
+          url = 'mailto:' + url;
+        }
+
+        const linkHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #d32f2f; text-decoration: underline;">${match}</a>`;
+        console.log('Generated link HTML:', linkHtml);
+        return linkHtml;
+      });
+    });
+
+    console.log('Final processed text:', processedText);
+    return processedText;
   }
 
   /**
