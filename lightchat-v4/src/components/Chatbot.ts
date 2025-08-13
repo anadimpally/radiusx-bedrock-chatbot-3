@@ -315,7 +315,7 @@ export class Chatbot {
   }
 
   /**
-   * Create launcher button
+   * Create launcher button with hover effect and sound
    */
   private createLauncher(): HTMLDivElement {
     const launcher = document.createElement('div');
@@ -340,7 +340,217 @@ export class Chatbot {
     const chatIcon = createSvgIcon(ICONS.CHAT, 24, 24);
     launcher.appendChild(chatIcon);
 
+    // Create hover popup
+    const popup = this.createHoverPopup();
+    document.body.appendChild(popup);
+
+    // Add hover event listeners
+    let hoverTimeout: NodeJS.Timeout;
+    let soundPlayed = false;
+
+    launcher.addEventListener('mouseenter', () => {
+      // Clear any existing timeout
+      clearTimeout(hoverTimeout);
+      
+      // Show popup after a small delay
+      hoverTimeout = setTimeout(() => {
+        popup.style.display = 'flex';
+        popup.style.opacity = '1';
+        
+        // Play bell sound only once per hover
+        if (!soundPlayed) {
+          this.playBellSound();
+          soundPlayed = true;
+        }
+      }, 300); // 300ms delay before showing popup
+    });
+
+    launcher.addEventListener('mouseleave', () => {
+      // Clear timeout and hide popup
+      clearTimeout(hoverTimeout);
+      popup.style.opacity = '0';
+      
+      // Hide popup after fade out
+      setTimeout(() => {
+        popup.style.display = 'none';
+        soundPlayed = false; // Reset sound flag
+      }, 200);
+    });
+
+    // Also hide popup when mouse leaves the popup itself
+    popup.addEventListener('mouseleave', () => {
+      popup.style.opacity = '0';
+      setTimeout(() => {
+        popup.style.display = 'none';
+        soundPlayed = false;
+      }, 200);
+    });
+
     return launcher;
+  }
+
+  /**
+   * Create hover popup with text and icons
+   */
+  private createHoverPopup(): HTMLDivElement {
+    const popup = document.createElement('div');
+    popup.id = 'chatbot-hover-popup';
+    
+    // Position the popup to the left of the launcher
+    popup.style.position = 'fixed';
+    popup.style.bottom = '20px';
+    popup.style.right = '90px'; // Position to the left of the launcher
+    popup.style.backgroundColor = 'white';
+    popup.style.borderRadius = '12px';
+    popup.style.padding = '16px';
+    popup.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+    popup.style.display = 'none';
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity 0.2s ease';
+    popup.style.zIndex = '998';
+    popup.style.minWidth = '280px';
+    popup.style.maxWidth = '320px';
+    popup.style.border = '1px solid #e2e8f0';
+
+    // Create popup content
+    const content = document.createElement('div');
+    content.style.display = 'flex';
+    content.style.alignItems = 'center';
+    content.style.gap = '12px';
+
+    // Left side - Shield icon
+    const shieldIcon = document.createElement('div');
+    shieldIcon.style.display = 'flex';
+    shieldIcon.style.alignItems = 'center';
+    shieldIcon.style.justifyContent = 'center';
+    shieldIcon.style.width = '40px';
+    shieldIcon.style.height = '40px';
+    shieldIcon.style.backgroundColor = '#d32f2f';
+    shieldIcon.style.borderRadius = '8px';
+    shieldIcon.style.color = 'white';
+    shieldIcon.style.flexShrink = '0';
+    
+    // Create shield icon SVG
+    const shieldSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    shieldSvg.setAttribute('width', '20');
+    shieldSvg.setAttribute('height', '20');
+    shieldSvg.setAttribute('viewBox', '0 0 24 24');
+    shieldSvg.setAttribute('fill', 'none');
+    shieldSvg.setAttribute('stroke', 'currentColor');
+    shieldSvg.setAttribute('stroke-width', '2');
+    shieldSvg.setAttribute('stroke-linecap', 'round');
+    shieldSvg.setAttribute('stroke-linejoin', 'round');
+    
+    const shieldPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    shieldPath.setAttribute('d', 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z');
+    shieldSvg.appendChild(shieldPath);
+    
+    // Add star inside shield
+    const starPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    starPath.setAttribute('d', 'M12 8l1.5 4.5L18 13.5l-3.5 3 1 4.5L12 18.5l-3.5 2.5 1-4.5L6 13.5l4.5-1z');
+    starPath.setAttribute('fill', 'white');
+    shieldSvg.appendChild(starPath);
+    
+    shieldIcon.appendChild(shieldSvg);
+    content.appendChild(shieldIcon);
+
+    // Middle - Text content
+    const textContent = document.createElement('div');
+    textContent.style.flex = '1';
+    textContent.style.minWidth = '0';
+
+    const questionText = document.createElement('div');
+    questionText.textContent = 'Have a question?';
+    questionText.style.fontWeight = '600';
+    questionText.style.fontSize = '14px';
+    questionText.style.color = '#2d3748';
+    questionText.style.marginBottom = '2px';
+    textContent.appendChild(questionText);
+
+    const helpText = document.createElement('div');
+    helpText.textContent = 'Let us help you today!';
+    helpText.style.fontSize = '12px';
+    helpText.style.color = '#718096';
+    textContent.appendChild(helpText);
+
+    content.appendChild(textContent);
+
+    // Right side - Arrow icon pointing to the main launcher
+    const arrowIcon = document.createElement('div');
+    arrowIcon.style.display = 'flex';
+    arrowIcon.style.alignItems = 'center';
+    arrowIcon.style.justifyContent = 'center';
+    arrowIcon.style.width = '40px';
+    arrowIcon.style.height = '40px';
+    arrowIcon.style.color = '#d32f2f';
+    arrowIcon.style.flexShrink = '0';
+
+    // Create arrow icon SVG
+    const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrowSvg.setAttribute('width', '24');
+    arrowSvg.setAttribute('height', '24');
+    arrowSvg.setAttribute('viewBox', '0 0 24 24');
+    arrowSvg.setAttribute('fill', 'none');
+    arrowSvg.setAttribute('stroke', 'currentColor');
+    arrowSvg.setAttribute('stroke-width', '2');
+    arrowSvg.setAttribute('stroke-linecap', 'round');
+    arrowSvg.setAttribute('stroke-linejoin', 'round');
+    
+    const arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowPath.setAttribute('d', 'M5 12h14M12 5l7 7-7 7');
+    arrowSvg.appendChild(arrowPath);
+    
+    arrowIcon.appendChild(arrowSvg);
+    content.appendChild(arrowIcon);
+    popup.appendChild(content);
+
+    return popup;
+  }
+
+  /**
+   * Play bell sound on hover
+   */
+  private playBellSound(): void {
+    try {
+      // Create audio context for bell sound
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Create oscillator for bell sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      // Connect nodes
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Configure bell sound
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Start frequency
+      oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1); // End frequency
+      oscillator.type = 'sine';
+      
+      // Configure volume envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      // Play the sound
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+      
+    } catch (error) {
+      console.log('Could not play bell sound:', error);
+      // Fallback: try to play a simple beep using HTML5 Audio
+      try {
+        const audio = new Audio();
+        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';
+        audio.volume = 0.3;
+        audio.play().catch(() => {
+          console.log('HTML5 Audio fallback also failed');
+        });
+      } catch (fallbackError) {
+        console.log('All audio methods failed:', fallbackError);
+      }
+    }
   }
 
   /**
